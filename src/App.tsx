@@ -29,41 +29,18 @@ function App() {
     let todolistId2 = v1();
     */
 
-    const todolistIdArray: Array<string> = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+    // const todolistIdArray: Array<string> = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+    let todolistIdArray: Array<string> = []
 
 
-    const [todos, setTodos] = useState<Array<TodoPlaceholderType>>([])
-    let [todolists, setTodolists] = useState<Array<TodolistType>>(
-        // [
-        // {id: todolistId1, title: 'What to learn', filter: 'all'},
-        // {id: todolistId2, title: 'What to buy', filter: 'all'}
-        //     ]
-
-        todolistIdArray.map((e, i) => ({id: todolistIdArray[i], title: `for user ${i + 1}`, filter: 'all'}))
-    )
-
-    const getPlaceholderAPI = async () => {
-        const result = await fetch('https://jsonplaceholder.typicode.com/todos')
-        const data = await result.json()
-        setTodos(data)
-
-        const newTasks: TasksStateType = {};
-        for (let i = 0; i < todolistIdArray.length; i++) {
-            newTasks[todolistIdArray[i]] = data.filter((e: TodoPlaceholderType) => e.userId.toString() === todolistIdArray[i])
-                .map((e: TodoPlaceholderType) => ({id: e.id.toString(), title: e.title, isDone: e.completed}))
-            // newTasks[todolistIdArray[i]] = newTasksReady.filter(t => t.id === todolistIdArray[i])
-        }
-
-        setTasks(newTasks)
-    }
-
-    useEffect(() => {
-        getPlaceholderAPI()
-    }, [])
-
-
+    // const [todos, setTodos] = useState<Array<TodoPlaceholderType>>([])
+    // const initialTodolists: Array<TodolistType> = todolistIdArray.map((e, i) => (
+    //     {id: todolistIdArray[i], title: `for user ${i + 1}`, filter: 'all'}
+    // ));
+    const initialTodolists: Array<TodolistType> = [];
+    let [todolists, setTodolists] = useState<Array<TodolistType>>(initialTodolists)
     const initialTasks: TasksStateType = {
-        [todolistIdArray[0]]: [
+        /*[todolistIdArray[0]]: [
             {id: v1(), title: 'HTML&CSS', isDone: true},
             {id: v1(), title: 'JS', isDone: true}
         ],
@@ -106,9 +83,39 @@ function App() {
         [todolistIdArray[10]]: [
             {id: v1(), title: 'HTML&CSS', isDone: true},
             {id: v1(), title: 'JS', isDone: true}
-        ],
+        ],*/
     }
     let [tasks, setTasks] = useState<TasksStateType>(initialTasks);
+
+    const getPlaceholderAPI = async () => {
+        const result = await fetch('https://jsonplaceholder.typicode.com/todos')
+        const data = await result.json()
+        // setTodos(data)
+
+        // define todolistsID based on UserID
+        todolistIdArray = data.map((item: TodoPlaceholderType) => item.userId.toString())
+            .filter((value: TodoPlaceholderType, index: number, self: Array<TodoPlaceholderType>) => self.indexOf(value) === index)
+
+        // create new tasks
+        const newTasks: TasksStateType = {};
+        for (let i = 0; i < todolistIdArray.length; i++) {
+            newTasks[todolistIdArray[i]] = data.filter((e: TodoPlaceholderType) => e.userId.toString() === todolistIdArray[i])
+                .map((e: TodoPlaceholderType) => ({id: e.id.toString(), title: e.title, isDone: e.completed}))
+        }
+
+        // set new todolists
+        setTodolists(todolistIdArray.map((e, i) => ({
+            id: todolistIdArray[i],
+            title: `for user ${i + 1}`,
+            filter: 'all'
+        })))
+        // set new tasks
+        setTasks(newTasks)
+    }
+
+    useEffect(() => {
+        getPlaceholderAPI()
+    }, [])
 
 
     function removeTask(id: string, todolistId: string) {
