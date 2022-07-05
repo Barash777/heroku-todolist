@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import './App.css';
 import {TaskType, Todolist} from './components/Todolist';
 import {v1} from 'uuid';
@@ -16,26 +16,99 @@ type TasksStateType = {
     [key: string]: Array<TaskType>
 }
 
+type TodoPlaceholderType = {
+    userId: number
+    id: number
+    title: string
+    completed: boolean
+}
 
 function App() {
+    /*
     let todolistId1 = v1();
     let todolistId2 = v1();
+    */
 
-    let [todolists, setTodolists] = useState<Array<TodolistType>>([
-        {id: todolistId1, title: 'What to learn', filter: 'all'},
-        {id: todolistId2, title: 'What to buy', filter: 'all'}
-    ])
+    const todolistIdArray: Array<string> = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
 
-    let [tasks, setTasks] = useState<TasksStateType>({
-        [todolistId1]: [
+
+    const [todos, setTodos] = useState<Array<TodoPlaceholderType>>([])
+    let [todolists, setTodolists] = useState<Array<TodolistType>>(
+        // [
+        // {id: todolistId1, title: 'What to learn', filter: 'all'},
+        // {id: todolistId2, title: 'What to buy', filter: 'all'}
+        //     ]
+
+        todolistIdArray.map((e, i) => ({id: todolistIdArray[i], title: `for user ${i + 1}`, filter: 'all'}))
+    )
+
+    const getPlaceholderAPI = async () => {
+        const result = await fetch('https://jsonplaceholder.typicode.com/todos')
+        const data = await result.json()
+        setTodos(data)
+
+        const newTasks: TasksStateType = {};
+        for (let i = 0; i < todolistIdArray.length; i++) {
+            newTasks[todolistIdArray[i]] = data.filter((e: TodoPlaceholderType) => e.userId.toString() === todolistIdArray[i])
+                .map((e: TodoPlaceholderType) => ({id: e.id.toString(), title: e.title, isDone: e.completed}))
+            // newTasks[todolistIdArray[i]] = newTasksReady.filter(t => t.id === todolistIdArray[i])
+        }
+
+        setTasks(newTasks)
+    }
+
+    useEffect(() => {
+        getPlaceholderAPI()
+    }, [])
+
+
+    const initialTasks: TasksStateType = {
+        [todolistIdArray[0]]: [
             {id: v1(), title: 'HTML&CSS', isDone: true},
             {id: v1(), title: 'JS', isDone: true}
         ],
-        [todolistId2]: [
-            {id: v1(), title: 'Milk', isDone: true},
-            {id: v1(), title: 'React Book', isDone: true}
-        ]
-    });
+        [todolistIdArray[1]]: [
+            {id: v1(), title: 'HTML&CSS', isDone: true},
+            {id: v1(), title: 'JS', isDone: true}
+        ],
+        [todolistIdArray[2]]: [
+            {id: v1(), title: 'HTML&CSS', isDone: true},
+            {id: v1(), title: 'JS', isDone: true}
+        ],
+        [todolistIdArray[3]]: [
+            {id: v1(), title: 'HTML&CSS', isDone: true},
+            {id: v1(), title: 'JS', isDone: true}
+        ],
+        [todolistIdArray[4]]: [
+            {id: v1(), title: 'HTML&CSS', isDone: true},
+            {id: v1(), title: 'JS', isDone: true}
+        ],
+        [todolistIdArray[5]]: [
+            {id: v1(), title: 'HTML&CSS', isDone: true},
+            {id: v1(), title: 'JS', isDone: true}
+        ],
+        [todolistIdArray[6]]: [
+            {id: v1(), title: 'HTML&CSS', isDone: true},
+            {id: v1(), title: 'JS', isDone: true}
+        ],
+        [todolistIdArray[7]]: [
+            {id: v1(), title: 'HTML&CSS', isDone: true},
+            {id: v1(), title: 'JS', isDone: true}
+        ],
+        [todolistIdArray[8]]: [
+            {id: v1(), title: 'HTML&CSS', isDone: true},
+            {id: v1(), title: 'JS', isDone: true}
+        ],
+        [todolistIdArray[9]]: [
+            {id: v1(), title: 'HTML&CSS', isDone: true},
+            {id: v1(), title: 'JS', isDone: true}
+        ],
+        [todolistIdArray[10]]: [
+            {id: v1(), title: 'HTML&CSS', isDone: true},
+            {id: v1(), title: 'JS', isDone: true}
+        ],
+    }
+    let [tasks, setTasks] = useState<TasksStateType>(initialTasks);
 
 
     function removeTask(id: string, todolistId: string) {
@@ -100,9 +173,11 @@ function App() {
         setTodolists(todolists.map(e => e.id === todolistID ? {...e, title: title} : e))
     }
 
-
     return (
         <div className="App">
+            {/*{todos.map(e => <div>userID: {e.userId}, id: {e.id}, title: {e.title},*/}
+            {/*    completed: {e.completed ? 'true' : 'false'}</div>)}*/}
+
             <Input callback={addTodolist}/>
 
             {
